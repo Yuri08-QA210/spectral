@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: spectral-ctf
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: FLAG
+        sync: false
+      - key: FLAG_OFFSET
+        value: "131072"
+      - key: MAX_KEYSTREAM_START
+        value: "8000"
+      - key: MAX_KEYSTREAM_LENGTH
+        value: "2000"
+      - key: PORT
+        value: "10000"
+    plan: free

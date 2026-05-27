@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  spectral:
+    build: .
+    ports:
+      - "10000:10000"
+    environment:
+      - FLAG=QA{r3d4ct3d}
+      - FLAG_OFFSET=131072
+      - MAX_KEYSTREAM_START=8000
+      - MAX_KEYSTREAM_LENGTH=2000
+      - PORT=10000
+    restart: unless-stopped

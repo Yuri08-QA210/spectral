@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECTRAL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:     #070710;
+            --bg1:    #0b0b18;
+            --bg2:    #0f0f1e;
+            --border: #191928;
+            --border2:#242438;
+            --accent: #00d97e;
+            --accent2:#00a85f;
+            --dim:    #2a2a44;
+            --muted:  #4a4a6a;
+            --text:   #c0c0d8;
+            --text2:  #7878a0;
+            --green:  #00d97e;
+            --red:    #e05555;
+            --amber:  #e0a03e;
+            --blue:   #4e8dee;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        body::before {
+            content:'';
+            position:fixed; inset:0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 56px 56px;
+            opacity: 0.25;
+            pointer-events:none; z-index:0;
+        }
+        /* subtle green vignette */
+        body::after {
+            content:'';
+            position:fixed; inset:0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0,180,100,0.05) 0%, transparent 65%);
+            pointer-events:none; z-index:0;
+        }
+
+        .wrap {
+            position:relative; z-index:1;
+            max-width:860px; margin:0 auto;
+            padding: 60px 24px 80px;
+        }
+
+        /* HEADER */
+        .hdr {
+            display:flex; align-items:flex-start; justify-content:space-between;
+            margin-bottom:56px; padding-bottom:28px;
+            border-bottom:1px solid var(--border2);
+        }
+        .logo {
+            font-size:2rem; font-weight:600;
+            letter-spacing:0.2em; color:#fff;
+        }
+        .logo span { color: var(--accent); }
+        .tagline {
+            font-family:'IBM Plex Sans',sans-serif;
+            font-size:0.76rem; color:var(--muted);
+            margin-top:6px; letter-spacing:0.06em;
+        }
+        .live-badge {
+            display:inline-flex; align-items:center; gap:6px;
+            background:#071a10; border:1px solid #0d3a20;
+            color:var(--green); font-size:0.67rem;
+            letter-spacing:0.12em; padding:5px 14px; border-radius:4px;
+        }
+        .live-badge::before {
+            content:'●'; font-size:0.48rem;
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* STATUS */
+        .status-bar {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:12px; margin-bottom:28px;
+        }
+        .stat {
+            background:var(--bg1); border:1px solid var(--border);
+            border-radius:6px; padding:16px 20px;
+        }
+        .stat-label { font-size:0.63rem; color:var(--muted); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:8px; }
+        .stat-value { font-size:1.2rem; font-weight:500; color:#fff; }
+        .stat-value.green { color:var(--green); }
+        .stat-value.amber { color:var(--amber); }
+        .stat-value.blue  { color:var(--blue);  }
+
+        /* CARD */
+        .card {
+            background:var(--bg1); border:1px solid var(--border);
+            border-radius:8px; margin-bottom:14px; overflow:hidden;
+        }
+        .card-head {
+            display:flex; align-items:center; gap:10px;
+            padding:13px 20px; border-bottom:1px solid var(--border);
+            background:var(--bg2);
+        }
+        .dot-accent {
+            width:6px; height:6px; border-radius:50%;
+            background:var(--accent); box-shadow:0 0 8px var(--accent);
+            flex-shrink:0;
+        }
+        .card-title { font-size:0.7rem; letter-spacing:0.16em; color:var(--text2); text-transform:uppercase; }
+
+        /* ENDPOINTS */
+        .ep {
+            display:flex; align-items:flex-start; gap:14px;
+            padding:14px 20px; border-bottom:1px solid var(--border);
+        }
+        .ep:last-child { border-bottom:none; }
+        .method {
+            font-size:0.6rem; font-weight:600; letter-spacing:0.07em;
+            padding:3px 8px; border-radius:3px; flex-shrink:0; margin-top:2px;
+        }
+        .method.get  { background:#071a10; color:#00d97e; border:1px solid #0d3a20; }
+        .method.post { background:#1a1000; color:#d4903e; border:1px solid #3d2800; }
+        .ep-path { font-size:0.8rem; color:#e0e0f0; margin-bottom:4px; }
+        .ep-desc {
+            font-family:'IBM Plex Sans',sans-serif;
+            font-size:0.74rem; color:var(--muted); line-height:1.5;
+        }
+        .ep-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+        .tag {
+            font-size:0.6rem; padding:2px 8px; border-radius:3px;
+            background:var(--bg2); border:1px solid var(--border2);
+            color:var(--dim); letter-spacing:0.04em;
+        }
+        .tag.hl { color:var(--text2); border-color:var(--dim); }
+
+        /* NOTICE */
+        .notice {
+            background:#100808; border:1px solid #2e1010;
+            border-left:3px solid var(--red);
+            border-radius:0 6px 6px 0; padding:14px 18px; margin-bottom:14px;
+        }
+        .notice-title { font-size:0.63rem; letter-spacing:0.15em; color:var(--red); margin-bottom:6px; }
+        .notice p {
+            font-family:'IBM Plex Sans',sans-serif;
+            font-size:0.74rem; color:#886666; line-height:1.6;
+        }
+
+        /* INTERACTIVE FORM */
+        .qform { display:grid; gap:12px; }
+        .field label {
+            display:block; font-size:0.63rem; color:var(--muted);
+            letter-spacing:0.1em; margin-bottom:6px;
+        }
+        .field input, .field select {
+            width:100%; background:#05050e; border:1px solid var(--border2);
+            border-radius:4px; color:var(--text);
+            font-family:'IBM Plex Mono',monospace; font-size:0.72rem;
+            padding:9px 12px; outline:none; transition:border-color 0.15s;
+        }
+        .field input:focus, .field select:focus { border-color:var(--accent); }
+        .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .qform-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .btn {
+            font-family:'IBM Plex Mono',monospace; font-size:0.67rem;
+            letter-spacing:0.08em; background:transparent;
+            border:1px solid var(--border2); color:var(--text2);
+            padding:8px 18px; border-radius:4px; cursor:pointer;
+            transition:all 0.15s;
+        }
+        .btn:hover { border-color:var(--accent); color:var(--accent); }
+        .btn.primary { background:var(--accent2); border-color:var(--accent); color:#000; font-weight:600; }
+        .btn.primary:hover { background:var(--accent); }
+        .result-box {
+            background:#03030a; border:1px solid var(--border);
+            border-radius:4px; padding:12px 14px;
+            font-size:0.72rem; color:var(--green);
+            min-height:44px; display:none; white-space:pre-wrap; word-break:break-all;
+        }
+        .result-box.show { display:block; }
+        .result-box.err  { color:var(--red); }
+
+        /* TERMINAL */
+        .term { background:#04040c; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+        .term-bar {
+            background:var(--bg2); padding:8px 14px;
+            display:flex; align-items:center; gap:6px;
+            border-bottom:1px solid var(--border);
+        }
+        .tdot { width:10px; height:10px; border-radius:50%; }
+        .tdot.r{background:#e05555} .tdot.y{background:#e0a03e} .tdot.g{background:#00d97e}
+        .term-lbl { font-size:0.63rem; color:var(--muted); letter-spacing:0.1em; margin-left:8px; }
+        .term-body {
+            padding:18px 20px; font-size:0.74rem; line-height:2;
+            max-height:260px; overflow-y:auto;
+        }
+        .term-body::-webkit-scrollbar{width:4px}
+        .term-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+        .tp { color:var(--accent); }
+        .to { color:var(--muted); }
+        .to.ok { color:var(--green); }
+        .tl { display:flex; gap:8px; }
+
+        /* FOOTER */
+        .footer {
+            margin-top:60px; padding-top:24px;
+            border-top:1px solid var(--border);
+            display:flex; justify-content:space-between; align-items:center;
+        }
+        .footer-l { font-size:0.63rem; color:var(--dim); letter-spacing:0.08em; }
+        .footer-r { font-size:0.6rem; color:var(--dim); }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <!-- HEADER -->
+    <div class="hdr">
+        <div>
+            <div class="logo">SPEC<span>TRAL</span></div>
+            <div class="tagline">Stream Cipher Research Service · v1.4.2</div>
+        </div>
+        <div class="live-badge">LIVE</div>
+    </div>
+
+    <!-- STATUS -->
+    <div class="status-bar">
+        <div class="stat">
+            <div class="stat-label">Service Status</div>
+            <div class="stat-value green" id="srv-status">ONLINE</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Cipher</div>
+            <div class="stat-value blue">LFSR-3</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Key Size</div>
+            <div class="stat-value amber">71 bits</div>
+        </div>
+    </div>
+
+    <!-- NOTICE -->
+    <div class="notice">
+        <div class="notice-title">ACCESS RESTRICTION</div>
+        <p>The keystream oracle only serves bytes from early stream positions. The encrypted target is located at a significantly later offset — direct retrieval is unavailable.</p>
+    </div>
+
+    <!-- API REFERENCE -->
+    <div class="card">
+        <div class="card-head">
+            <div class="dot-accent"></div>
+            <div class="card-title">API Reference</div>
+        </div>
+        <div style="padding:0 20px;">
+            <div class="ep">
+                <span class="method get">GET</span>
+                <div>
+                    <div class="ep-path">/api/info</div>
+                    <div class="ep-desc">Challenge parameters and runtime configuration</div>
+                </div>
+            </div>
+            <div class="ep">
+                <span class="method get">GET</span>
+                <div>
+                    <div class="ep-path">/api/flag</div>
+                    <div class="ep-desc">Encrypted flag (hex-encoded) and its stream offset</div>
+                </div>
+            </div>
+            <div class="ep">
+                <span class="method get">GET</span>
+                <div>
+                    <div class="ep-path">/api/keystream?start=&lt;int&gt;&amp;length=&lt;int&gt;</div>
+                    <div class="ep-desc">Request keystream bytes from a given position</div>
+                    <div class="ep-meta">
+                        <span class="tag hl">start: byte offset (0-indexed)</span>
+                        <span class="tag hl">length: max MAX_KEYSTREAM_LENGTH</span>
+                        <span class="tag">start &lt; MAX_KEYSTREAM_START</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ep">
+                <span class="method post">POST</span>
+                <div>
+                    <div class="ep-path">/api/encrypt</div>
+                    <div class="ep-desc">Encrypt arbitrary plaintext — keystream starts from position 0</div>
+                    <div class="ep-meta">
+                        <span class="tag hl">body: {"plaintext": "&lt;hex&gt;"}</span>
+                        <span class="tag">max 64 bytes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KEYSTREAM ORACLE -->
+    <div class="card">
+        <div class="card-head">
+            <div class="dot-accent"></div>
+            <div class="card-title">Keystream Oracle</div>
+        </div>
+        <div style="padding:20px;">
+            <div class="qform">
+                <div class="row2">
+                    <div class="field">
+                        <label>START OFFSET</label>
+                        <input id="ks-start" type="number" min="0" value="0" placeholder="0">
+                    </div>
+                    <div class="field">
+                        <label>LENGTH (bytes)</label>
+                        <input id="ks-len" type="number" min="1" max="256" value="32" placeholder="32">
+                    </div>
+                </div>
+                <div class="qform-actions">
+                    <button class="btn primary" onclick="doKeystream()">→ Fetch</button>
+                    <button class="btn" onclick="clearResult('ks-result')">Clear</button>
+                </div>
+                <div class="result-box" id="ks-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENCRYPT FORM -->
+    <div class="card">
+        <div class="card-head">
+            <div class="dot-accent"></div>
+            <div class="card-title">Encrypt Oracle</div>
+        </div>
+        <div style="padding:20px;">
+            <div class="qform">
+                <div class="field">
+                    <label>PLAINTEXT (hex)</label>
+                    <input id="enc-pt" type="text" placeholder="deadbeef...">
+                </div>
+                <div class="qform-actions">
+                    <button class="btn primary" onclick="doEncrypt()">→ Encrypt</button>
+                    <button class="btn" onclick="clearResult('enc-result')">Clear</button>
+                </div>
+                <div class="result-box" id="enc-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERMINAL SAMPLE -->
+    <div class="card">
+        <div class="card-head">
+            <div class="dot-accent"></div>
+            <div class="card-title">Sample Interaction</div>
+        </div>
+        <div style="padding:0">
+            <div class="term">
+                <div class="term-bar">
+                    <div class="tdot r"></div><div class="tdot y"></div><div class="tdot g"></div>
+                    <span class="term-lbl">bash</span>
+                </div>
+                <div class="term-body">
+                    <div class="tl"><span class="tp">$</span><span>curl /api/info</span></div>
+                    <div class="tl"><span class="to ok">{"challenge":"SPECTRAL","key_size":71,...}</span></div>
+                    <br>
+                    <div class="tl"><span class="tp">$</span><span>curl /api/flag</span></div>
+                    <div class="tl"><span class="to ok">{"encrypted_flag":"a3f2...","offset":131072,"length":42}</span></div>
+                    <br>
+                    <div class="tl"><span class="tp">$</span><span>curl "/api/keystream?start=0&amp;length=100"</span></div>
+                    <div class="tl"><span class="to ok">{"keystream":"7b2a...","start":0,"length":100}</span></div>
+                    <br>
+                    <div class="tl"><span class="tp">$</span><span>curl -X POST /api/encrypt \</span></div>
+                    <div class="tl"><span class="tp"> </span><span>&nbsp;-d '{"plaintext":"deadbeef"}'</span></div>
+                    <div class="tl"><span class="to ok">{"ciphertext":"a1b2c3d4","length":4}</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-l">SPECTRAL · STREAM CIPHER RESEARCH</div>
+        <div class="footer-r" id="ts"></div>
+    </div>
+</div>
+
+<script>
+function ts(){ document.getElementById('ts').textContent = new Date().toISOString().replace('T',' ').slice(0,19)+' UTC'; }
+ts(); setInterval(ts,1000);
+
+function clearResult(id){ const el=document.getElementById(id); el.className='result-box'; el.textContent=''; }
+
+function showResult(id, text, isErr){
+    const el = document.getElementById(id);
+    el.className = 'result-box show' + (isErr ? ' err' : '');
+    el.textContent = text;
+}
+
+async function doKeystream(){
+    const start  = parseInt(document.getElementById('ks-start').value)||0;
+    const length = parseInt(document.getElementById('ks-len').value)||32;
+    showResult('ks-result','fetching...',false);
+    try {
+        const r = await fetch(`/api/keystream?start=${start}&length=${length}`);
+        const d = await r.json();
+        showResult('ks-result', JSON.stringify(d,null,2), !!d.error);
+    } catch(e) { showResult('ks-result','error: '+e.message, true); }
+}
+
+async function doEncrypt(){
+    const pt = document.getElementById('enc-pt').value.trim();
+    if(!pt){ showResult('enc-result','error: plaintext is required',true); return; }
+    showResult('enc-result','sending...',false);
+    try {
+        const r = await fetch('/api/encrypt',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({plaintext: pt})
+        });
+        const d = await r.json();
+        showResult('enc-result', JSON.stringify(d,null,2), !!d.error);
+    } catch(e) { showResult('enc-result','error: '+e.message, true); }
+}
+
+fetch('/api/info').catch(()=>{
+    document.getElementById('srv-status').textContent='OFFLINE';
+    document.getElementById('srv-status').style.color='var(--red)';
+});
+</script>
+</body>
+</html>
